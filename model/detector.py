@@ -1,5 +1,8 @@
 from database.oracle import OracleDatabase
 from model import predict_query
+from model_xgb import predict_query_xgb
+
+flag = input("Use XGBoost model? (y/n): ").strip().lower() == "y"
 
 
 def read_query():
@@ -33,7 +36,10 @@ while True:
     if query.strip().lower() in ("exit;", "exit"):
         break
 
-    result = predict_query(query)
+    if flag:
+        result = predict_query_xgb(query)
+    else:
+        result = predict_query(query)
 
     print(
         f"Detector: {result['prediction']} "

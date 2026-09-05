@@ -8,14 +8,11 @@ from sklearn.linear_model import LogisticRegression
 
 df = pd.read_csv("C:\\Users\\sabbu\\PycharmProjects\\injection_detector\\dataset\\SQLiV3.csv")
 
-
 df["Label"] = pd.to_numeric(df["Label"], errors="coerce")
 
 df = df[df["Label"].isin([0, 1])]
 
 df = df[["Sentence", "Label"]]
-
-
 
 #%%
 X = df["Sentence"]
@@ -100,6 +97,8 @@ def extract_sql_features(query):
     }
 
     return list(features.values())
+
+
 #%%
 X_train_sql = np.array([
     extract_sql_features(q)
@@ -110,7 +109,6 @@ X_test_sql = np.array([
     extract_sql_features(q)
     for q in X_test
 ])
-
 
 #%%
 from sklearn.preprocessing import StandardScaler
@@ -170,17 +168,28 @@ X_test_final = hstack([
 ]).tocsr()
 
 #%%
-from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
 
-final_model = LogisticRegression(
-    max_iter=1500,
-    C=2.0,
-    random_state=42
+xgb_model = XGBClassifier(
+    n_estimators=400,
+    max_depth=6,
+    learning_rate=0.08,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    objective="binary:logistic",
+    eval_metric="logloss",
+    random_state=42,
+    n_jobs=-1
 )
 
-final_model.fit(X_train_final, y_train)
+xgb_model.fit(X_train_final, y_train)
 
-def predict_query(query):
+y_pred_xgb = xgb_model.predict(X_test_final)
+
+
+#%%
+
+def predict_query_xgb(query):
     char_features = char_vectorizer.transform([query])
     word_features = word_vectorizer.transform([query])
 
@@ -200,7 +209,7 @@ def predict_query(query):
         csr_matrix(sql_features)
     ]).tocsr()
 
-    probability = final_model.predict_proba(
+    probability = xgb_model.predict_proba(
         final_features
     )[0, 1]
 
