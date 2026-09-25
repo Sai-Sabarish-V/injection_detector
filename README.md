@@ -55,8 +55,8 @@ SQL-Injection-Detector/
 ## 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd <YOUR_REPOSITORY_NAME>
+git clone https://github.com/Sai-Sabarish-V/injection_detector.git
+cd injection_detector
 ```
 
 ---
